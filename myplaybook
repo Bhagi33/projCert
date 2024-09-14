@@ -1,0 +1,9 @@
+---
+ - hosts: testserver
+   gather_facts: false
+   become: yes
+   tasks:
+   - name: Manage docker tool
+     apt:
+       name: docker.io
+       state: present

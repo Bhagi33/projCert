@@ -1,2 +1,2 @@
-[testnodes]
-agent-node ansible_ssh_host=52.54.203.93 ansible_ssh_user=devopsadmin
+[testnode]
+agent-node ansible_ssh_host=107.23.204.200 ansible_ssh_user=ansibleadmin

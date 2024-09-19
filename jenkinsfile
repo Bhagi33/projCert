@@ -1,0 +1,50 @@
+pipeline {
+
+    agent { label 'slave1' }
+
+        environment {
+                DOCKERHUB_CREDENTIALS=credentials('dockerhub')
+        }
+
+    stages {
+        stage('SCM_Checkout') {
+            steps {
+                echo 'Perform SCM Checkout'
+                                git 'https://github.com/Bhagi33/projCert.git'
+            }
+        }
+        stage('Ansible install docker') {
+            steps {
+                echo 'Perform Docker installation on jenkins Slave'
+                ansiblePlaybook become: true, credentialsId: 'ansiblecnadmin-on-jenkinsmaster', disableHostKeyChecking: true, installation: 'ansible', inventory: 'myhostfile', playbook: 'myplaybook.yaml', vaultTmpPath: ''
+            }
+        }
+        
+                stage('Build Docker Image') {
+            steps {
+                                sh 'docker version'
+                                sh "docker build -t bhagi99/edureka-project1:${BUILD_NUMBER} ."
+                                sh 'docker image list'
+                                sh "docker tag bhagi99/jenkins:${BUILD_NUMBER} bhagi99/edureka-project1:latest"
+            }
+        }
+
+                stage('Login2DockerHub') {
+
+                        steps {
+                                sh 'echo $DOCKERHUB_CREDENTIALS_PSW| docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                        }
+                }
+                stage('Publish_to_Docker_Registry') {
+                        steps {
+                                sh "docker push bhagi99/edureka-project1:latest"
+                        }
+                }
+              stage('create container on VM') {
+                        steps {
+                            sh "docker run -d bhagi99/edureka-project1:latest"
+                        }
+                }     
+                
+}
+}
